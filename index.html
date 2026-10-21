@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Еловый мыс</title>
+  <meta name="claude:viewport-fit-sides" content="cover">
+  <meta name="description" content="Учебный сайт бронирования загородных домов у озера: схема посёлка, фильтры, расчёт стоимости и «Мои брони».">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 48 48%22%3E%3Cpath fill=%22%232e5b3e%22 d=%22M24 4 L36 22 H30 L40 36 H8 L18 22 H12 Z%22/%3E%3Crect fill=%22%23a85f1b%22 x=%2221%22 y=%2236%22 width=%226%22 height=%228%22/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Yeseva+One&display=swap">
+  <link rel="stylesheet" href="css/style.css">
+  <script type="module" src="js/app.js"></script>
+</head>
+<body>
+  <header class="top">
+    <div class="wrap top__inner">
+      <div class="brand">
+        <svg class="brand__mark" viewBox="0 0 48 48" aria-hidden="true">
+          <path d="M24 4 L36 22 H30 L40 36 H8 L18 22 H12 Z"></path>
+          <rect x="21" y="36" width="6" height="8" rx="1"></rect>
+        </svg>
+        <div>
+          <p class="eyebrow">Загородные дома у озера Светлое</p>
+          <h1>Еловый мыс</h1>
+        </div>
+      </div>
+      <p class="demo-note" role="note">Учебное демо: бронирования сохраняются только в этом браузере</p>
+    </div>
+  </header>
+
+  <main class="wrap layout">
+    <section class="filters" aria-labelledby="filters-title">
+      <h2 id="filters-title" class="sr-only">Фильтры</h2>
+      <div class="field">
+        <label for="f-guests">Сколько вас</label>
+        <select id="f-guests">
+          <option value="0">Любое число гостей</option>
+          <option value="2">от 2 гостей</option>
+          <option value="4">от 4 гостей</option>
+          <option value="6">от 6 гостей</option>
+          <option value="8">от 8 гостей</option>
+        </select>
+      </div>
+      <div class="field field--range">
+        <label for="f-price">Цена за ночь до <output id="f-price-out" for="f-price">10 000 ₽</output></label>
+        <input type="range" id="f-price" min="3000" max="10000" step="500" value="10000">
+      </div>
+      <label class="check" for="f-free">
+        <input type="checkbox" id="f-free">
+        <span>Только свободные</span>
+      </label>
+      <button type="button" class="btn btn--ghost" id="f-reset">Сбросить фильтры</button>
+      <p class="filters__count" id="f-count" aria-live="polite"></p>
+    </section>
+
+    <section class="panel map-panel" aria-labelledby="map-title">
+      <div class="panel__head">
+        <h2 id="map-title">Схема посёлка</h2>
+        <ul class="legend" aria-label="Обозначения">
+          <li><span class="legend__mark is-free" aria-hidden="true"></span>Свободен</li>
+          <li><span class="legend__mark is-selected" aria-hidden="true">✓</span>Выбран</li>
+          <li><span class="legend__mark is-busy" aria-hidden="true">✕</span>Занят</li>
+          <li><span class="legend__mark is-mine" aria-hidden="true">★</span>Ваша бронь</li>
+        </ul>
+      </div>
+      <div class="map" id="map">
+        <svg class="map__bg" viewBox="0 0 1000 700" preserveAspectRatio="none" aria-hidden="true">
+          <rect class="m-ground" x="0" y="0" width="1000" height="700"></rect>
+          <path class="m-field" d="M0 420 C60 400 120 420 160 450 C120 520 60 560 0 560 Z"></path>
+          <path id="lake" class="m-water" d="M640 300 C730 250 900 255 1000 300 L1000 700 L520 700 C500 650 520 590 575 560 C620 535 600 470 590 420 C580 370 600 325 640 300 Z"></path>
+          <path class="m-shore" d="M640 300 C730 250 900 255 1000 300 M520 700 C500 650 520 590 575 560 C620 535 600 470 590 420 C580 370 600 325 640 300"></path>
+          <rect class="m-pier" x="540" y="596" width="70" height="14" rx="2"></rect>
+          <path id="road" class="m-road" d="M-20 610 C120 600 240 560 300 470 C360 380 380 300 470 240 C560 180 700 150 1020 130"></path>
+          <path class="m-road-line" d="M-20 610 C120 600 240 560 300 470 C360 380 380 300 470 240 C560 180 700 150 1020 130"></path>
+          <g id="trees"></g>
+          <text class="m-label m-label--water" x="800" y="520">оз. Светлое</text>
+          <text class="m-label" x="20" y="660">к трассе Р-21</text>
+        </svg>
+        <div class="map__pins" id="map-pins"></div>
+        <p class="map__empty" id="map-empty" hidden>По этим фильтрам домиков нет. Увеличьте цену или уменьшите число гостей.</p>
+      </div>
+    </section>
+
+    <aside class="panel card-panel" id="card-panel" aria-labelledby="card-title">
+      <div id="card-info" class="card-info"></div>
+
+      <form id="booking-form" class="book" novalidate>
+        <div class="book__row">
+          <div class="field">
+            <label for="b-guests">Гостей</label>
+            <div class="stepper">
+              <button type="button" class="stepper__btn" data-step="b-guests" data-delta="-1" aria-label="Меньше гостей">−</button>
+              <input id="b-guests" type="number" inputmode="numeric" min="1" max="8" step="1" value="2" aria-describedby="b-guests-hint b-guests-err">
+              <button type="button" class="stepper__btn" data-step="b-guests" data-delta="1" aria-label="Больше гостей">+</button>
+            </div>
+            <p class="hint" id="b-guests-hint">от 1 до вместимости дома</p>
+            <p class="err" id="b-guests-err"></p>
+          </div>
+          <div class="field">
+            <label for="b-nights">Ночей</label>
+            <div class="stepper">
+              <button type="button" class="stepper__btn" data-step="b-nights" data-delta="-1" aria-label="Меньше ночей">−</button>
+              <input id="b-nights" type="number" inputmode="numeric" min="1" max="30" step="1" value="2" aria-describedby="b-nights-hint b-nights-err">
+              <button type="button" class="stepper__btn" data-step="b-nights" data-delta="1" aria-label="Больше ночей">+</button>
+            </div>
+            <p class="hint" id="b-nights-hint">от 1 до 30</p>
+            <p class="err" id="b-nights-err"></p>
+          </div>
+        </div>
+
+        <div class="total" aria-live="polite">
+          <span class="total__label">Итого</span>
+          <strong class="total__sum" id="b-total">—</strong>
+          <span class="total__calc" id="b-calc"></span>
+        </div>
+
+        <p class="err err--block" id="b-house-err"></p>
+        <button class="btn btn--primary btn--wide" id="b-submit" type="submit">Подтвердить бронь</button>
+        <p class="small">Учебное демо, реальная бронь не оформляется. Оплата не нужна.</p>
+        <div class="success" id="b-success" role="status" hidden></div>
+      </form>
+    </aside>
+
+    <section class="panel list-panel" aria-labelledby="list-title">
+      <div class="panel__head">
+        <h2 id="list-title">Все домики</h2>
+        <p class="panel__note">Выбор работает и с клавиатуры: Tab и Enter</p>
+      </div>
+      <ul class="house-list" id="house-list"></ul>
+      <p class="empty" id="list-empty" hidden>Ничего не нашлось. Сбросьте фильтры или поднимите максимальную цену.</p>
+    </section>
+
+    <section class="panel bookings-panel" id="bookings" aria-labelledby="bookings-title">
+      <div class="panel__head">
+        <h2 id="bookings-title" tabindex="-1">Мои брони</h2>
+        <p class="panel__note" id="bookings-sum"></p>
+      </div>
+      <div id="bookings-body"></div>
+      <div class="bookings-panel__foot">
+        <button type="button" class="btn btn--quiet" id="demo-reset">Сбросить демо</button>
+      </div>
+    </section>
+  </main>
+
+  <footer class="wrap foot">
+    <p>«Еловый мыс» — вымышленный посёлок. Учебный проект: HTML, CSS и JavaScript без сервера.</p>
+  </footer>
+
+  <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+</body>
+</html>
